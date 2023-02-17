@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import '../../../utils/constants.dart';
 import '../../../utils/helper_functions.dart';
+import '../../notes/note_dashboard.dart';
 import '../animations/change_screen_animation.dart';
 import 'bottom_text.dart';
 import 'top_text.dart';
@@ -64,21 +65,10 @@ class _LoginContentState extends State<LoginContent>
       child: ElevatedButton(
         onPressed: () {
           if(title == "Log In"){
-            // _appRepository.getUser(usernameController.text, passwordController.text).then((value) {
-            //   if(value.length>0) {
-            //     LocalNotificationService.initialize();
-            //     debugPrint(value.length.toString());
-            //     Navigator.pushReplacement(
-            //       context,MaterialPageRoute(builder: (context) => OnBoardingHome()),);
-            //   } else {
-            //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            //       content: Text("Invalid username or password"),
-            //     ));
-            //   }
-            // });
+            Navigator.pushReplacement(
+              context,MaterialPageRoute(builder: (context) => const NoteDashboard()),);
           } else {
-            // User user = User(usernameController.text, passwordController.text, emailController.text, false);
-            // _appRepository.addUser(user);
+
           }
 
 
