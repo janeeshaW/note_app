@@ -1,5 +1,7 @@
 
 import 'package:flutter/material.dart';
+import 'package:progress_indicators/progress_indicators.dart';
+import '../../services/api_services.dart';
 import '../../utils/constants.dart';
 import '../../widgets/custom_shape_clipper.dart';
 
@@ -93,6 +95,9 @@ class _AddEventScreenBottomState extends State<AddEventScreenBottom> {
   String selectedTime = "Select time";
   String pickedDate = "Select Date";
   final titleController = TextEditingController();
+  final descriptionController = TextEditingController();
+  bool noteCreated = false;
+  bool isLoading = false;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -104,6 +109,7 @@ class _AddEventScreenBottomState extends State<AddEventScreenBottom> {
       setState(() {
         selectedDate = picked;
         pickedDate = "${selectedDate.toLocal()}".split(' ')[0];
+        print("pickedDate : $pickedDate");
       });
     }
   }
@@ -131,7 +137,7 @@ class _AddEventScreenBottomState extends State<AddEventScreenBottom> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return isLoading ? Center(child: ScalingText('Loading...'),): Container(
       width: MediaQuery.of(context).size.width,
       child: Padding(
         padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
@@ -160,6 +166,27 @@ class _AddEventScreenBottomState extends State<AddEventScreenBottom> {
               height: 20.0,
             ),
             const Text(
+              "Description",
+              style: TextStyle(
+                  color: bgDark, fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(
+              height: 10.0,
+            ),
+            TextField(
+              controller: descriptionController,
+              style: const TextStyle(color: bgTextColorBlack),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(width: 2, color: bgDark), //<--<-- SEE HERE
+                ),
+                hintText: 'Enter Note Description',
+              ),
+            ),
+            const SizedBox(
+              height: 20.0,
+            ),
+            const Text(
               "Enter Date",
               style: TextStyle(
                   color: bgDark, fontSize: 16, fontWeight: FontWeight.w600),
@@ -178,33 +205,8 @@ class _AddEventScreenBottomState extends State<AddEventScreenBottom> {
                 hintText: pickedDate,
               ),
             ),
-            const SizedBox(
-              height: 20.0,
-            ),
-            const Text(
-              "Add Time",
-              style: TextStyle(
-                  color: bgDark, fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(
-              height: 10.0,
-            ),
-            TextField(
-              readOnly: true,
-              onTap: () {
-                displayTimeDialog(context);
-              },
-              style: const TextStyle(color: bgTextColorBlack),
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(
-                  borderSide: BorderSide(width: 2, color: bgDark), //<-- //<-- SEE HERE
-                ),
-                hintText: selectedTime,
-              ),
-            ),
-            const SizedBox(
-              height: 20.0,
-            ),
+
+
             const SizedBox(
               height: 30.0,
             ),
@@ -213,12 +215,23 @@ class _AddEventScreenBottomState extends State<AddEventScreenBottom> {
               child: SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
 
-                      if(titleController.text.isNotEmpty && selectedTime != "Select time" && pickedDate != "Select Date"){
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: const Text("Note added successfully"),
-                        ));
+                      if(titleController.text.isNotEmpty && pickedDate != "Select Date" && descriptionController.text.isNotEmpty){
+                        setState(() {
+                          isLoading = true;
+                        });
+                        noteCreated = await  createNote(titleController.text,descriptionController.text,pickedDate);
+                        setState(() {
+                          isLoading = false;
+                        });
+
+                        if(noteCreated){
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content:  Text("Note added successfully"),
+                          ));
+                        }
+
                        // Navigator.pop(context);
                       }
 
