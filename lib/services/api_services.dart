@@ -29,3 +29,26 @@ Future<NotesModel?> requestGetALLNotes() async {
   }
 
 }
+
+Future<bool> deleteNote (String noteId) async{
+  String username = "JaneeshaW";
+  String password = "Eyepax123@";
+  String basicAuth =
+      'Basic ' + base64.encode(utf8.encode('$username:$password'));
+  Response response;
+  response = await dio.delete(
+    'https://dev148166.service-now.com/api/now/table/x_979268_eyepax_sn_note/$noteId',
+    options: Options(
+      headers: {
+        "authorization": basicAuth,
+        "Accept" : "application/json"
+      },
+    ),
+    //queryParameters: {'id': 12, 'name': 'dio'},
+  );
+  if(response.statusCode == 204){
+    return true;
+  } else {
+    return false;
+  }
+}

@@ -4,6 +4,7 @@ import '../../models/notes.dart';
 import '../../services/api_services.dart';
 import '../../utils/constants.dart';
 import '../../widgets/custom_shape_clipper.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({Key? key}) : super(key: key);
@@ -16,6 +17,7 @@ class _NotesViewState extends State<NotesView> {
 
   bool isLoading = true;
   bool hasData = false;
+
 
   NotesModel? notes;
   @override
@@ -40,7 +42,7 @@ class _NotesViewState extends State<NotesView> {
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
-      body: isLoading ? const Center(child: CircularProgressIndicator(),): !hasData? const Text("You Dont Have Any Saved Notes"): SingleChildScrollView(
+      body: isLoading ?  Center(child: ScalingText('Loading...'),): !hasData? const Text("You Dont Have Any Saved Notes"): SingleChildScrollView(
         child: Column(
           children: [const AddEventTop(), AddEventScreenBottom(notes: notes!,)],
         ),
@@ -105,10 +107,13 @@ class AddEventScreenBottom extends StatefulWidget {
 }
 
 class _AddEventScreenBottomState extends State<AddEventScreenBottom> {
+  bool delete = false;
+  bool isLoading = false;
+  //List<int> items = List<int>.generate(100, (int index) => index);
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return  isLoading ? Center(child: ScalingText('Loading...'),): SizedBox(
       width: MediaQuery.of(context).size.width,
       child: Padding(
         padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
@@ -119,34 +124,54 @@ class _AddEventScreenBottomState extends State<AddEventScreenBottom> {
          shrinkWrap: true,
           itemCount: widget.notes.results.length,
             itemBuilder: (BuildContext context, int index) {
-            return Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
+            return Dismissible(
+              background: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Container(
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(15),color: Colors.red,),
+
+                ),
               ),
-              color: Colors.black,
-              elevation: 10,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  const ListTile(
-                    //leading: Icon(Icons.album, size: 70),
-                    title: Text('Heart Shaker', style: TextStyle(color: Colors.white)),
-                    subtitle: Text('TWICE', style: TextStyle(color: Colors.white)),
-                  ),
-                  Row(
-                    children:  [
-                      FlatButton(
-                        child: const Text('Edit', style: TextStyle(color: Colors.white)),
-                        onPressed: () {},
-                      ),
-                      Spacer(),
-                      FlatButton(
-                        child: const Text('Delete', style: TextStyle(color: Colors.white)),
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
-                ],
+              key: ValueKey<ResultGroup>(widget.notes.results[index]),
+              onDismissed: (DismissDirection direction) async {
+                setState(() {
+                  widget.notes.results.removeAt(index);
+                  isLoading = true;
+                });
+                delete = await deleteNote(widget.notes.results[index].id!);
+                setState(() {
+                  isLoading = false;
+                });
+              },
+              child:   Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                color: Colors.black,
+                elevation: 10,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    ListTile(
+                      //leading: Icon(Icons.album, size: 70),
+                      title: Text(widget.notes.results[index].title!, style: TextStyle(color: Colors.white)),
+                      subtitle: Text(widget.notes.results[index].description!, style: TextStyle(color: Colors.white)),
+                    ),
+                    Row(
+                      children:  [
+                        TextButton(
+                          child: const Text('Edit', style: TextStyle(color: Colors.white)),
+                          onPressed: () {},
+                        ),
+                        const Spacer(),
+                        TextButton(
+                          child: const Text('Delete', style: TextStyle(color: Colors.white)),
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             );
           }
