@@ -1,6 +1,8 @@
-
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:ionicons/ionicons.dart';
+import '../../../services/api_services.dart';
 import '../../../utils/constants.dart';
 import '../../../utils/helper_functions.dart';
 import '../../notes/note_dashboard.dart';
@@ -15,6 +17,7 @@ enum Screens {
 
 class LoginContent extends StatefulWidget {
   const LoginContent({Key? key}) : super(key: key);
+
   @override
   State<LoginContent> createState() => _LoginContentState();
 }
@@ -27,9 +30,11 @@ class _LoginContentState extends State<LoginContent>
   final usernameController = TextEditingController();
   final emailController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+
   //static AppRepository _appRepository = GetIt.instance.get<AppRepository>();
 
-  Widget inputField(String hint, IconData iconData, TextEditingController textEditingController) {
+  Widget inputField(String hint, IconData iconData,
+      TextEditingController textEditingController) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 8),
       child: SizedBox(
@@ -59,19 +64,49 @@ class _LoginContentState extends State<LoginContent>
     );
   }
 
+  Future<bool> loginPress(String username, String password) async {
+    bool loggedIn = await getUserProfile(username, password);
+    loadingIndicatorHide();
+    if (loggedIn) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   Widget loginButton(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 135, vertical: 16),
       child: ElevatedButton(
-        onPressed: () {
-          if(title == "Log In"){
-            Navigator.pushReplacement(
-              context,MaterialPageRoute(builder: (context) => const NoteDashboard()),);
-          } else {
+        onPressed: () async {
+          if (title == "Log In") {
+            loadingIndicatorShow();
+            bool loggedIn = await loginPress(
+                usernameController.text, passwordController.text.trim());
+            if (loggedIn) {
 
-          }
-
-
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const NoteDashboard()),
+              );
+            } else {
+              AwesomeDialog(
+                context: context,
+                dialogType: DialogType.error,
+                animType: AnimType.rightSlide,
+                title: 'Oops..',
+                desc: 'Invalid User',
+                btnCancelOnPress: () {
+                  usernameController.clear();
+                  passwordController.clear();
+                },
+                btnOkOnPress: () {
+                  usernameController.clear();
+                  passwordController.clear();
+                },
+              ).show();
+            }
+          } else {}
         },
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -141,9 +176,7 @@ class _LoginContentState extends State<LoginContent>
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 0),
       child: TextButton(
-        onPressed: () {
-
-        },
+        onPressed: () {},
         child: const Text(
           'Forgot Password?',
           style: TextStyle(
@@ -191,7 +224,7 @@ class _LoginContentState extends State<LoginContent>
     ];
 
     loginContent = [
-      inputField('Email', Ionicons.mail_outline,usernameController),
+      inputField('Email', Ionicons.mail_outline, usernameController),
       inputField('Password', Ionicons.lock_closed_outline, passwordController),
       loginButton('Log In'),
       forgotPassword(),
@@ -261,6 +294,51 @@ class _LoginContentState extends State<LoginContent>
           ),
         ),
       ],
+    );
+  }
+
+  loadingIndicatorShow() async {
+    EasyLoading.instance
+      ..indicatorType = EasyLoadingIndicatorType.chasingDots
+      ..loadingStyle = EasyLoadingStyle.custom
+      ..indicatorSize = 45.0
+      ..radius = 10.0
+      ..progressColor = Colors.white
+      ..backgroundColor = Colors.black
+      ..indicatorColor = Colors.white
+      ..textColor = Colors.white
+      ..maskColor = Colors.black.withOpacity(0.2)
+      ..userInteractions = true
+      ..dismissOnTap = false
+      ..textStyle =
+          const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)
+      ..customAnimation = CustomAnimation();
+    await EasyLoading.show(
+      status: 'Wait a moment...',
+      maskType: EasyLoadingMaskType.custom,
+    );
+  }
+
+  loadingIndicatorHide() async {
+    await EasyLoading.dismiss();
+  }
+}
+
+class CustomAnimation extends EasyLoadingAnimation {
+  CustomAnimation();
+
+  @override
+  Widget buildWidget(
+    Widget child,
+    AnimationController controller,
+    AlignmentGeometry alignment,
+  ) {
+    return Opacity(
+      opacity: controller.value,
+      child: RotationTransition(
+        turns: controller,
+        child: child,
+      ),
     );
   }
 }
