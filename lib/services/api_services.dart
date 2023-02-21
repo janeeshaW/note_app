@@ -53,6 +53,36 @@ Future<bool> deleteNote (String noteId) async{
   }
 }
 
+
+Future<bool> getUserProfile(String inputUsername,String inputPassword) async {
+  String username = inputUsername;
+  String password = inputPassword;
+  String basicAuth =
+      'Basic ' + base64.encode(utf8.encode('$username:$password'));
+  Response response;
+  try{
+    response = await dio.get(
+      'https://dev148166.service-now.com/api/now/table/sys_user',
+      options: Options(
+        headers: {
+          "authorization": basicAuth,
+          "Accept" : "application/json"
+        },
+      ),
+      queryParameters: {'user_name': inputUsername},
+    );
+    if(response.statusCode == 200){
+      print(response);
+      return true;
+    } else {
+      return false;
+    }
+  }catch(e){
+    return false;
+  }
+}
+
+
 Future<bool> createNote (String title, String description, String date) async{
   String username = "JaneeshaW";
   String password = "Eyepax123@";
