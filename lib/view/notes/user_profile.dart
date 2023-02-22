@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../utils/constants.dart';
 import '../../widgets/custom_shape_clipper.dart';
+import '../login_screen/login_screen.dart';
 
 class UserProfile extends StatefulWidget {
   const UserProfile({Key? key}) : super(key: key);
@@ -19,6 +20,8 @@ class UserProfile extends StatefulWidget {
 class _UserProfileState extends State<UserProfile> {
   bool isLoading = true;
   UserModel? currentUser;
+  AppSharedData? sharedData;
+
 
   @override
   void initState() {
@@ -28,8 +31,8 @@ class _UserProfileState extends State<UserProfile> {
 
   void getUser() async {
     final sharedPref = await SharedPreferences.getInstance();
-    AppSharedData sharedData = AppSharedData(prefs: sharedPref);
-    String user = await sharedData.getToken(USER);
+    sharedData = AppSharedData(prefs: sharedPref);
+    String user = await sharedData!.getToken(USER);
     currentUser = UserModel.fromJson(jsonDecode(user));
     isLoading = false;
     setState(() {});
@@ -63,6 +66,37 @@ class _UserProfileState extends State<UserProfile> {
                     height: 20,
                   ),
                   Text(currentUser!.result[0].email!),
+                  SizedBox(height: 30,),
+                  ElevatedButton(
+                    onPressed: () async {
+                      sharedData!.clearAll();
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      );
+                      //_appRepository.addReminder(Reminder(selectedType, titleController.text, selectedTime, pickedDate,"false", _selectedOption[repeatIndex].toString()));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                          side: BorderSide(color: bgDark)
+                      ),
+                      primary: bgDark,
+                      elevation: 8,
+                      shadowColor: Colors.black87,
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.only(left: 25,right: 25,top: 4,bottom: 4),
+                      child: Text(
+                        "Log Out",
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700
+                        ),
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),

@@ -121,3 +121,34 @@ Future<bool> createNote (String title, String description, String date) async{
     return false;
   }
 }
+
+Future<bool> updateNote (String title, String description, String date, String noteId) async{
+  final sharedPref = await SharedPreferences.getInstance();
+  AppSharedData sharedData = AppSharedData(prefs: sharedPref);
+  String user = await sharedData.getToken(USER);
+  UserModel currentUser = UserModel.fromJson(jsonDecode(user));
+  String basicAuth = await sharedData.getToken(AUTH_TOKEN);
+  Response response;
+  var params =  {
+    "u_note_description": description,
+    "u_note_title": title,
+    "u_due_date": date,
+    "u_created_by": currentUser.result[0].userName,
+  };
+  response = await dio.put(
+      'https://dev148166.service-now.com/api/now/table/x_979268_eyepax_sn_note/$noteId',
+      options: Options(
+        headers: {
+          "authorization": basicAuth,
+          "Accept" : "application/json",
+        },
+      ),
+      data: jsonEncode(params)
+    //queryParameters: {'id': 12, 'name': 'dio'},
+  );
+  if(response.statusCode == 200){
+    return true;
+  } else {
+    return false;
+  }
+}

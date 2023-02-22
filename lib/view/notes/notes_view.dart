@@ -6,6 +6,8 @@ import '../../utils/constants.dart';
 import '../../widgets/custom_shape_clipper.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
+import 'add_note.dart';
+
 class NotesView extends StatefulWidget {
   const NotesView({Key? key}) : super(key: key);
 
@@ -152,6 +154,10 @@ class _AddEventScreenBottomState extends State<AddEventScreenBottom> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 15),
+                      child: Text(widget.notes.results[index].date!, style: TextStyle(color: Colors.white)),
+                    ),
                     ListTile(
                       //leading: Icon(Icons.album, size: 70),
                       title: Text(widget.notes.results[index].title!, style: TextStyle(color: Colors.white)),
@@ -161,7 +167,12 @@ class _AddEventScreenBottomState extends State<AddEventScreenBottom> {
                       children:  [
                         TextButton(
                           child: const Text('Edit', style: TextStyle(color: Colors.white)),
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => AddNote(isEdit: true,noteID: widget.notes.results[index].id!)),
+                            );
+                          },
                         ),
                         const Spacer(),
                         TextButton(

@@ -6,7 +6,9 @@ import '../../utils/constants.dart';
 import '../../widgets/custom_shape_clipper.dart';
 
 class AddNote extends StatefulWidget {
-  const AddNote({Key? key}) : super(key: key);
+  final bool isEdit;
+  final String? noteID;
+  const AddNote({Key? key, required this.isEdit, this.noteID}) : super(key: key);
 
   @override
   State<AddNote> createState() => _AddNoteState();
@@ -24,7 +26,7 @@ class _AddNoteState extends State<AddNote> {
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Column(
-          children: const [AddEventTop(), AddEventScreenBottom()],
+          children: [AddEventTop(isEdit: widget.isEdit,), AddEventScreenBottom(isEdit: widget.isEdit,noteID: widget.noteID,)],
         ),
       ),
     );
@@ -32,7 +34,8 @@ class _AddNoteState extends State<AddNote> {
 }
 
 class AddEventTop extends StatefulWidget {
-  const AddEventTop({Key? key}) : super(key: key);
+  final bool isEdit;
+  const AddEventTop({Key? key,required this.isEdit}) : super(key: key);
 
   @override
   State<AddEventTop> createState() => _AddEventTopState();
@@ -59,15 +62,22 @@ class _AddEventTopState extends State<AddEventTop> {
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Text(
-                          "Add Your Note",
+                      children: [
+                       widget.isEdit? const Text(
+                          "Edit Your Note",
                           style: TextStyle(
                             color: kBackgroundColor,
                             fontSize: 21,
                             fontWeight: FontWeight.w700,
                           ),
-                        )
+                        ): const Text(
+                         "Add Your Note",
+                         style: TextStyle(
+                           color: kBackgroundColor,
+                           fontSize: 21,
+                           fontWeight: FontWeight.w700,
+                         ),
+                       )
                       ],
                     ),
                   ),
@@ -80,7 +90,9 @@ class _AddEventTopState extends State<AddEventTop> {
 }
 
 class AddEventScreenBottom extends StatefulWidget {
-  const AddEventScreenBottom({Key? key}) : super(key: key);
+  final bool isEdit;
+  final String? noteID;
+  const AddEventScreenBottom({Key? key,required this.isEdit, this.noteID}) : super(key: key);
 
   @override
   State<AddEventScreenBottom> createState() =>
@@ -98,6 +110,7 @@ class _AddEventScreenBottomState extends State<AddEventScreenBottom> {
   final descriptionController = TextEditingController();
   bool noteCreated = false;
   bool isLoading = false;
+  bool noteUpdated = false;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -221,7 +234,14 @@ class _AddEventScreenBottomState extends State<AddEventScreenBottom> {
                         setState(() {
                           isLoading = true;
                         });
-                        noteCreated = await  createNote(titleController.text,descriptionController.text,pickedDate);
+                        if(widget.isEdit){
+                          noteUpdated = await updateNote(titleController.text, descriptionController.text, pickedDate, widget.noteID!);
+                          print("note updated : $noteUpdated");
+                        } else {
+                          noteCreated = await  createNote(titleController.text,descriptionController.text,pickedDate);
+
+                        }
+
                         setState(() {
                           isLoading = false;
                         });
@@ -229,6 +249,11 @@ class _AddEventScreenBottomState extends State<AddEventScreenBottom> {
                         if(noteCreated){
                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                             content:  Text("Note added successfully"),
+                          ));
+                        }
+                        if (noteUpdated){
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content:  Text("Note updated successfully"),
                           ));
                         }
 
@@ -247,9 +272,15 @@ class _AddEventScreenBottomState extends State<AddEventScreenBottom> {
                       elevation: 8,
                       shadowColor: Colors.black87,
                     ),
-                    child: const Padding(
-                      padding: EdgeInsets.all(4.0),
-                      child: Text(
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: widget.isEdit? const Text(
+                        "Edit Note",
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700
+                        ),
+                      ): const Text(
                         "Add Note",
                         style: TextStyle(
                             fontSize: 12,
