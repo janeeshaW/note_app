@@ -34,7 +34,7 @@ class _LoginContentState extends State<LoginContent>
   //static AppRepository _appRepository = GetIt.instance.get<AppRepository>();
 
   Widget inputField(String hint, IconData iconData,
-      TextEditingController textEditingController) {
+      TextEditingController textEditingController, bool obsecureTextInput) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 8),
       child: SizedBox(
@@ -46,6 +46,7 @@ class _LoginContentState extends State<LoginContent>
           borderRadius: BorderRadius.circular(30),
           child: TextField(
             controller: textEditingController,
+            obscureText: obsecureTextInput,
             style: TextStyle(color: bgTextColorBlack),
             textAlignVertical: TextAlignVertical.bottom,
             decoration: InputDecoration(
@@ -214,9 +215,9 @@ class _LoginContentState extends State<LoginContent>
   @override
   void initState() {
     createAccountContent = [
-      inputField('Name', Ionicons.person_outline, usernameController),
-      inputField('Email', Ionicons.mail_outline, emailController),
-      inputField('Password', Ionicons.lock_closed_outline, passwordController),
+      inputField('Name', Ionicons.person_outline, usernameController,false),
+      inputField('Email', Ionicons.mail_outline, emailController,false),
+      inputField('Password', Ionicons.lock_closed_outline, passwordController,true),
       loginButton('Sign Up'),
       orDivider(),
       logos(),
@@ -224,8 +225,8 @@ class _LoginContentState extends State<LoginContent>
     ];
 
     loginContent = [
-      inputField('Email', Ionicons.mail_outline, usernameController),
-      inputField('Password', Ionicons.lock_closed_outline, passwordController),
+      inputField('Username', Ionicons.person, usernameController,false),
+      inputField('Password', Ionicons.lock_closed_outline, passwordController,true),
       loginButton('Log In'),
       forgotPassword(),
     ];
