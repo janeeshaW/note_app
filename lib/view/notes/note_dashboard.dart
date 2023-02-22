@@ -16,7 +16,7 @@ class NoteDashboard extends StatefulWidget {
 class _ExpensesHomeState extends State<NoteDashboard> {
   int _selectedIndex = 0;
   List<Widget> myBody = [
-    const AddNote(),
+    const AddNote(isEdit: false,),
     const NotesView(),
     const UserProfile(),
     //Other(),
